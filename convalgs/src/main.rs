@@ -11,9 +11,11 @@ fn main() {
     let inpside = conv.convolve(ConvolutionMethod::InputSide);
     let outside = conv.convolve(ConvolutionMethod::OutputSide);
     let karat = conv.convolve(ConvolutionMethod::Karatsuba);
+    let fft = conv.convolve(ConvolutionMethod::Fft);
 
     println!("INPSIDE: {:?}", inpside);
     println!("OUTSIDE: {:?}", outside);
     println!("KARAT: {:?}", karat);
+    println!("FFT: {:?}", fft);
 
 }

@@ -1,6 +1,10 @@
+#![allow(clippy::only_used_in_recursion)]
+
 use num_traits::Float;
 use std::ops::{Add, Mul, AddAssign};
 use std::fmt::Debug;
+use realfft::{RealFftPlanner, FftNum};
+use rustfft::num_complex::Complex;
 
 
 pub enum ConvolutionMethod {
@@ -19,7 +23,7 @@ pub struct Convolve<'a, T: Float> {
 
 impl<'a, T> Convolve<'a, T> 
 where
-    T: Debug + Float + AddAssign + Add + Mul
+    T: Debug + Float + AddAssign + Add + Mul + FftNum +
 {
     pub fn new(x: &'a Vec<T>, h: &'a Vec<T>) -> Self {
         Self { x, h }
@@ -31,19 +35,20 @@ where
         let ylen = xlen + hlen - 1;
         let mut y: Vec<T> = vec![T::zero(); ylen];
 
+        let pow_size = 1 << (ylen as f32).log2().ceil() as usize;
+        let mut xpad = vec![T::zero(); pow_size];
+        let mut hpad = vec![T::zero(); pow_size];
+        xpad[..xlen].copy_from_slice(&self.x[..]);
+        hpad[..hlen].copy_from_slice(&self.h[..]);
+
         match mode {
             ConvolutionMethod::InputSide => self._input_side_helper(self.x, self.h, &mut y),
             ConvolutionMethod::OutputSide => self._output_side_helper(self.x, self.h, &mut y),
             ConvolutionMethod::Karatsuba => {
-                let size = 1 << (ylen as f32).log2().ceil() as usize;
-                let mut xpad = vec![T::zero(); size];
-                let mut hpad = vec![T::zero(); size];
-                xpad[..xlen].copy_from_slice(&self.x[..]);
-                hpad[..hlen].copy_from_slice(&self.h[..]);
                 let _y = self._karatsuba_helper(&xpad, &hpad);
                 y[..].copy_from_slice(&_y[..ylen]);
             },
-            ConvolutionMethod::Fft => { todo!() },
+            ConvolutionMethod::Fft => self._fft_helper(&mut xpad, &mut hpad, &mut y),
             ConvolutionMethod::OlaFft => { todo!() },
             ConvolutionMethod::Ntt => { todo!() },
         }
@@ -104,6 +109,33 @@ where
         }
         
         y
+
+    }
+
+    fn _fft_helper(&self, x: &mut [T], h: &mut [T], buffer: &mut [T]) {
+        let ylen = x.len();
+        
+        let mut xplanner = RealFftPlanner::<T>::new();
+        let mut hplanner = RealFftPlanner::<T>::new();
+        
+        let xfft = xplanner.plan_fft_forward(ylen);
+        let hfft = hplanner.plan_fft_forward(ylen);
+
+        let mut xspectrum = xfft.make_output_vec();
+        let mut hspectrum = hfft.make_output_vec();
+
+        xfft.process(x, &mut xspectrum).unwrap();
+        hfft.process(h, &mut hspectrum).unwrap();
+
+        let mut fft_prod = xspectrum.iter().zip(hspectrum.iter()).map(|(&a, &b)| a * b).collect::<Vec<Complex<T>>>();
+
+        let ifft = xplanner.plan_fft_inverse(ylen);
+        let mut ifft_time = ifft.make_output_vec();
+        ifft.process(&mut fft_prod, &mut ifft_time).unwrap();
+
+        for (i, value) in buffer.iter_mut().enumerate() {
+            *value = ifft_time[i] / T::from(ylen).unwrap();
+        }
 
     }
 
