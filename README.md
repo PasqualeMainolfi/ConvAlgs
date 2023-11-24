@@ -1,7 +1,7 @@
 # Convolution Algorithms  
 
 [Def. 1.1]  
-$(x*h) [n] = y[n] = \sum_{k=0}^{|h| - 1}h[k] \cdot x[n - k]$
+$$(x*h) [n] = y[n] = \sum_{k=0}^{|h| - 1}h[k] \cdot x[n - k]$$
 
 *What algorithms are most time efficient for computing the convolution  
 (according to Def. 1.1) of two time-series on a modern machine and in  
