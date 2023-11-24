@@ -9,14 +9,11 @@ which scenarios do they perform best?* [1]
 
 **Algos**:  
 
-- **Output-side algorithm**. The complexity of this algorithm is  
-  $O(|y| \cdot |h|) = O(|x| \cdot |h| + |h|^2)$. Let $n > |x|, |h|$, then this can be  
-  further expressed as $O(n^2)$  
-- **Input-side algorithm**. The complexity of this algorithm is  
-  $O(|x| \cdot |h|)$. With $n > |x|, |h|$, the algorithm also belongs to $O(n^2)$
-- **Karatsuba (adapted) algorithm**. The complexity of this algorithm is  
-  $O(n^{\log_{2}3}) \approx O(n^{1.58})$  
-- **FFT convolution** 
-- **OLA FFT**
+- **Output-side algorithm** $\rightarrow O(|y| \cdot |h|) = O(|x| \cdot |h| + |h|^2)$  
+  let $n > |x|, |h| \rightarrow O(n^2)$  
+- **Input-side algorithm** $\rightarrow O(|x| \cdot |h|)$  
+  let $n > |x|, |h|\rightarrow O(n^2)$
+- **FFT convolution** $\rightarrow O(|x| \log{|x|} + |h| \log{|h|})$
+- **OLA FFT** $\rightarrow O(k \cdot |n| \log{|n|})$ where k is the number of frames and |n| is the frame size  
 
 **[1]** N. Ghidirimschi, *Convolution Algorithms for interger data types*, University of Groningen, 2021
