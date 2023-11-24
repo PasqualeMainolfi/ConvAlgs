@@ -18,7 +18,6 @@ fn main() {
     
     get_process_time(&conv, ConvolutionMethod::InputSide, "INPSIDE");
     get_process_time(&conv, ConvolutionMethod::OutputSide, "OUTSIDE");
-    get_process_time(&conv, ConvolutionMethod::Karatsuba, "KARAT");
     get_process_time(&conv, ConvolutionMethod::Fft, "FFT");
     get_process_time(&conv, ConvolutionMethod::OlaFft(4096), "OLA FFT");
 
